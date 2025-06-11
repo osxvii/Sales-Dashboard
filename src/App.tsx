@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { LoginPage } from './pages/LoginPage'
 import { DashboardLayout } from './components/layout/DashboardLayout'
 import { DashboardPage } from './pages/DashboardPage'
+import { EcommercePage } from './pages/EcommercePage'
 import { useAuth } from './hooks/useAuth'
 import './index.css'
 
@@ -21,7 +22,11 @@ function App() {
     <Router>
       <div className="min-h-screen bg-gray-50">
         <Routes>
+          {/* Public Routes */}
+          <Route path="/store" element={<EcommercePage />} />
           <Route path="/login" element={!admin ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
+          
+          {/* Protected Admin Routes */}
           <Route path="/" element={admin ? <DashboardLayout /> : <Navigate to="/login" replace />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />

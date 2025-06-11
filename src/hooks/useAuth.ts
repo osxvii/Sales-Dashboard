@@ -74,6 +74,23 @@ export const useAuth = () => {
       return admin
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed'
+      
+      // Log failed access attempt
+      try {
+        const location = await detectLocation()
+        await supabase.from('access_logs').insert({
+          admin_id: null,
+          email: email,
+          login_time: getCurrentUTCTime(),
+          location: `${location.city}, ${location.country}`,
+          ip_address: location.ip,
+          user_agent: navigator.userAgent,
+          success: false
+        })
+      } catch (logError) {
+        console.error('Failed to log access attempt:', logError)
+      }
+      
       setAuthState(prev => ({ ...prev, loading: false, error: errorMessage }))
       throw error
     }

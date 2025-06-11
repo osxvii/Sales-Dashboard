@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Bell, User, LogOut, Globe } from 'lucide-react'
+import { Bell, User, LogOut, Globe, ExternalLink } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { dbService } from '../../lib/supabase'
 import type { Notification } from '../../lib/supabase'
@@ -32,10 +32,17 @@ export const TopBar: React.FC = () => {
 
     if (admin) {
       loadNotifications()
+      // Refresh notifications every 30 seconds
+      const interval = setInterval(loadNotifications, 30000)
+      return () => clearInterval(interval)
     }
   }, [admin])
 
   const unreadCount = notifications.length
+
+  const openStore = () => {
+    window.open('/store', '_blank')
+  }
 
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm">
@@ -45,6 +52,15 @@ export const TopBar: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-4">
+          {/* Store Link */}
+          <button
+            onClick={openStore}
+            className="flex items-center space-x-2 px-3 py-2 text-sm text-quickcart-600 hover:text-quickcart-700 hover:bg-quickcart-50 rounded-md transition-colors"
+          >
+            <ExternalLink className="h-4 w-4" />
+            <span>View Store</span>
+          </button>
+          
           {/* Current Time */}
           <div className="flex items-center space-x-2 text-sm text-gray-600">
             <Globe className="h-4 w-4" />

@@ -4,14 +4,13 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { detectLocation, getCurrentUTCTime, type LocationData } from '../utils/location'
-import { supabase } from '../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [location, setLocation] = useState<LocationData | null>(null)
+  const { login, loading, error } = useAuth()
 
   useEffect(() => {
     // Detect user location on page load
@@ -20,34 +19,11 @@ export const LoginPage: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    setError('')
-
+    
     try {
-      // For now, we'll implement a simple frontend validation
-      // Later we'll integrate with Supabase auth
-      if (email && password) {
-        // Log access attempt
-        const accessLog = {
-          email,
-          login_time: getCurrentUTCTime(),
-          location: location ? `${location.city}, ${location.country}` : 'Unknown',
-          ip_address: location?.ip || 'Unknown',
-          user_agent: navigator.userAgent,
-          success: true
-        }
-        
-        console.log('Access Log:', accessLog)
-        
-        // Simulate successful login
-        alert('Login successful! (Demo mode)')
-      } else {
-        setError('Please enter both email and password')
-      }
+      await login(email, password)
     } catch (err) {
-      setError('Login failed. Please try again.')
-    } finally {
-      setLoading(false)
+      // Error is handled by useAuth hook
     }
   }
 
@@ -96,9 +72,17 @@ export const LoginPage: React.FC = () => {
                 </Button>
               </form>
               
+              <div className="mt-6 p-4 bg-quickcart-50 rounded-lg">
+                <p className="text-sm text-quickcart-700 font-medium">Demo Credentials:</p>
+                <p className="text-sm text-gray-600">
+                  Email: admin@quickcart.com<br />
+                  Password: any password
+                </p>
+              </div>
+              
               {location && (
-                <div className="mt-6 p-4 bg-quickcart-50 rounded-lg">
-                  <p className="text-sm text-quickcart-700 font-medium">Login Location Detected:</p>
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-700 font-medium">Login Location Detected:</p>
                   <p className="text-sm text-gray-600">
                     {location.city}, {location.country} • {getCurrentUTCTime().split('T')[1].split('.')[0]} UTC
                   </p>
