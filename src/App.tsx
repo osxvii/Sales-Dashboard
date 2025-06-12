@@ -6,6 +6,10 @@ import { DashboardPage } from './pages/DashboardPage'
 import { EcommercePage } from './pages/EcommercePage'
 import { MonitorPage } from './pages/MonitorPage'
 import { ErrorLogsPage } from './pages/ErrorLogsPage'
+import { ProductsPage } from './pages/ProductsPage'
+import { TransactionsPage } from './pages/TransactionsPage'
+import { CompaniesPage } from './pages/CompaniesPage'
+import { CategoriesPage } from './pages/CategoriesPage'
 import { useAuth } from './hooks/useAuth'
 import './index.css'
 
@@ -32,13 +36,13 @@ function App() {
           <Route path="/" element={admin ? <DashboardLayout /> : <Navigate to="/login" replace />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="transactions" element={<TransactionsPage />} />
+            <Route path="companies" element={<CompaniesPage />} />
+            <Route path="categories" element={<CategoriesPage />} />
             <Route path="monitor" element={<MonitorPage />} />
             <Route path="errors" element={<ErrorLogsPage />} />
-            {/* Placeholder routes for other pages */}
-            <Route path="products" element={<div className="p-6">Products Page - Coming Soon</div>} />
-            <Route path="transactions" element={<div className="p-6">Transactions Page - Coming Soon</div>} />
-            <Route path="companies" element={<div className="p-6">Companies Page - Coming Soon</div>} />
-            <Route path="categories" element={<div className="p-6">Categories Page - Coming Soon</div>} />
+            {/* Placeholder routes for remaining pages */}
             <Route path="analytics" element={<div className="p-6">Analytics Page - Coming Soon</div>} />
             <Route path="admins" element={<div className="p-6">Admins Page - Coming Soon</div>} />
             <Route path="access-logs" element={<div className="p-6">Access Logs Page - Coming Soon</div>} />
