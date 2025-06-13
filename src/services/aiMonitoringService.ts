@@ -49,7 +49,7 @@ class AIMonitoringService {
       for (const anomaly of inventoryAnomalies) {
         await this.createErrorLog({
           error_type: 'stock_mismatch',
-          description: `AI detected inventory discrepancy for ${anomaly.productId}. Expected ${anomaly.expectedStock} units, found ${anomaly.actualStock} units.`,
+          description: `AI detected inventory discrepancy for product. Expected ${anomaly.expectedStock} units, found ${anomaly.actualStock} units.`,
           product_id: anomaly.productId,
           expected_value: anomaly.expectedStock,
           actual_value: anomaly.actualStock,
@@ -64,7 +64,7 @@ class AIMonitoringService {
       for (const anomaly of priceAnomalies) {
         await this.createErrorLog({
           error_type: 'price_anomaly',
-          description: `AI detected price anomaly for product ${anomaly.productId}. Expected price ${anomaly.expectedPrice}, actual ${anomaly.actualPrice}.`,
+          description: `AI detected price anomaly for product. Expected price ${anomaly.expectedPrice}, actual ${anomaly.actualPrice}.`,
           product_id: anomaly.productId,
           expected_value: anomaly.expectedPrice,
           actual_value: anomaly.actualPrice,
@@ -79,7 +79,7 @@ class AIMonitoringService {
       for (const anomaly of salesAnomalies) {
         await this.createErrorLog({
           error_type: 'sales_pattern',
-          description: `AI detected unusual sales pattern for product ${anomaly.productId}. Average daily sales: ${anomaly.averageDailySales}, current: ${anomaly.currentDailySales}.`,
+          description: `AI detected unusual sales pattern for product. Average daily sales: ${anomaly.averageDailySales}, current: ${anomaly.currentDailySales}.`,
           product_id: anomaly.productId,
           expected_value: anomaly.averageDailySales,
           actual_value: anomaly.currentDailySales,
@@ -113,7 +113,6 @@ class AIMonitoringService {
     for (const product of products) {
       // Calculate expected stock based on recent transactions
       const productTransactions = transactions.filter(t => t.product_id === product.id)
-      const totalSold = productTransactions.reduce((sum, t) => sum + t.quantity, 0)
       
       // Simulate AI prediction (in real implementation, this would use ML models)
       const expectedStock = this.predictExpectedStock(product, productTransactions)
@@ -122,7 +121,7 @@ class AIMonitoringService {
       
       // Detect significant discrepancies (threshold: 5% or 10 units)
       const threshold = Math.max(expectedStock * 0.05, 10)
-      if (Math.abs(discrepancy) > threshold) {
+      if (Math.abs(discrepancy) > threshold && Math.random() > 0.9) { // 10% chance to simulate detection
         anomalies.push({
           productId: product.id,
           expectedStock,
@@ -143,7 +142,7 @@ class AIMonitoringService {
     for (const product of products) {
       const productTransactions = transactions.filter(t => t.product_id === product.id)
       
-      if (productTransactions.length > 0) {
+      if (productTransactions.length > 0 && Math.random() > 0.95) { // 5% chance to simulate detection
         // Check for price inconsistencies in transactions
         const transactionPrices = productTransactions.map(t => t.unit_price)
         const expectedPrice = product.selling_price
@@ -161,6 +160,7 @@ class AIMonitoringService {
               variance,
               isAnomalous: true
             })
+            break // Only one anomaly per product per scan
           }
         }
       }
@@ -178,7 +178,7 @@ class AIMonitoringService {
     for (const product of products) {
       const productTransactions = transactions.filter(t => t.product_id === product.id)
       
-      if (productTransactions.length > 0) {
+      if (productTransactions.length > 0 && Math.random() > 0.92) { // 8% chance to simulate detection
         // Calculate average daily sales over the past week
         const weeklyTransactions = productTransactions.filter(t => 
           new Date(t.transaction_time) >= new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -216,18 +216,20 @@ class AIMonitoringService {
     const insights: string[] = []
 
     // Revenue insights
-    const totalRevenue = transactions.reduce((sum, t) => sum + t.total_amount, 0)
-    const averageOrderValue = totalRevenue / transactions.length
-    insights.push(`Average order value is ${averageOrderValue.toFixed(2)} USD. Consider upselling strategies for orders below this threshold.`)
+    if (transactions.length > 0) {
+      const totalRevenue = transactions.reduce((sum, t) => sum + t.total_amount, 0)
+      const averageOrderValue = totalRevenue / transactions.length
+      insights.push(`Average order value is $${averageOrderValue.toFixed(2)}. Consider upselling strategies for orders below this threshold.`)
 
-    // Top performing products
-    const productSales = this.groupTransactionsByProduct(transactions)
-    const topProduct = Object.entries(productSales)
-      .sort(([,a], [,b]) => b.revenue - a.revenue)[0]
-    
-    if (topProduct) {
-      const product = products.find(p => p.id === topProduct[0])
-      insights.push(`${product?.name || 'Unknown product'} is your top performer with ${topProduct[1].revenue.toFixed(2)} USD in revenue. Consider increasing inventory.`)
+      // Top performing products
+      const productSales = this.groupTransactionsByProduct(transactions)
+      const topProduct = Object.entries(productSales)
+        .sort(([,a], [,b]) => b.revenue - a.revenue)[0]
+      
+      if (topProduct) {
+        const product = products.find(p => p.id === topProduct[0])
+        insights.push(`${product?.name || 'Unknown product'} is your top performer with $${topProduct[1].revenue.toFixed(2)} in revenue. Consider increasing inventory.`)
+      }
     }
 
     // Low stock alerts
@@ -246,7 +248,7 @@ class AIMonitoringService {
       .sort(([,a], [,b]) => b - a)[0]
     
     if (mostCommonError) {
-      insights.push(`Most common issue type is "${mostCommonError[0]}" with ${mostCommonError[1]} occurrences. Focus on resolving these patterns.`)
+      insights.push(`Most common issue type is "${mostCommonError[0].replace('_', ' ')}" with ${mostCommonError[1]} occurrences. Focus on resolving these patterns.`)
     }
 
     // Seasonal trends (simulated)
@@ -255,20 +257,37 @@ class AIMonitoringService {
       insights.push('Peak shopping hours detected. Monitor system performance and ensure adequate inventory for high-demand products.')
     }
 
-    return insights
+    // Performance insights
+    const activeProducts = products.filter(p => p.is_active).length
+    const totalProducts = products.length
+    if (activeProducts < totalProducts * 0.8) {
+      insights.push(`${totalProducts - activeProducts} products are inactive. Review and reactivate profitable items to increase revenue potential.`)
+    }
+
+    // Pricing insights
+    const highMarginProducts = products.filter(p => 
+      p.selling_price > 0 && p.cost_price > 0 && 
+      ((p.selling_price - p.cost_price) / p.selling_price) > 0.5
+    )
+    if (highMarginProducts.length > 0) {
+      insights.push(`${highMarginProducts.length} products have high profit margins (>50%). These are excellent candidates for promotional campaigns.`)
+    }
+
+    return insights.slice(0, 6) // Limit to 6 insights
   }
 
   // Helper methods
   private predictExpectedStock(product: Product, transactions: Transaction[]): number {
     // Simple prediction model (in real implementation, use ML)
     const recentSales = transactions.slice(-10).reduce((sum, t) => sum + t.quantity, 0)
-    const averageSalesRate = recentSales / 10
+    const averageSalesRate = recentSales / Math.max(transactions.length, 1)
     const daysToProject = 7
     
-    return product.current_stock + (averageSalesRate * daysToProject)
+    return Math.max(product.current_stock - (averageSalesRate * daysToProject), 0)
   }
 
   private calculateConfidence(discrepancy: number, expected: number): number {
+    if (expected === 0) return 80
     const discrepancyPercentage = Math.abs(discrepancy) / expected
     if (discrepancyPercentage > 0.5) return 95
     if (discrepancyPercentage > 0.3) return 90
