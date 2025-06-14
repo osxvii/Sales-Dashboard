@@ -10,6 +10,8 @@ import { ProductsPage } from './pages/ProductsPage'
 import { TransactionsPage } from './pages/TransactionsPage'
 import { CompaniesPage } from './pages/CompaniesPage'
 import { CategoriesPage } from './pages/CategoriesPage'
+import { AdminsPage } from './pages/AdminsPage'
+import { AccessLogsPage } from './pages/AccessLogsPage'
 import { useAuth } from './hooks/useAuth'
 import './index.css'
 
@@ -42,10 +44,10 @@ function App() {
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="monitor" element={<MonitorPage />} />
             <Route path="errors" element={<ErrorLogsPage />} />
+            <Route path="admins" element={<AdminsPage />} />
+            <Route path="access-logs" element={<AccessLogsPage />} />
             {/* Placeholder routes for remaining pages */}
             <Route path="analytics" element={<div className="p-6">Analytics Page - Coming Soon</div>} />
-            <Route path="admins" element={<div className="p-6">Admins Page - Coming Soon</div>} />
-            <Route path="access-logs" element={<div className="p-6">Access Logs Page - Coming Soon</div>} />
             <Route path="chat" element={<div className="p-6">Chat (Stella) Page - Coming Soon</div>} />
           </Route>
         </Routes>
