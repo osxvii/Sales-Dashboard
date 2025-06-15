@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Bell, User, LogOut, Globe, ExternalLink } from 'lucide-react'
+import { Bell, User, LogOut, Globe, ExternalLink, Settings } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { dbService } from '../../lib/supabase'
+import { NotificationCenter } from '../notifications/NotificationCenter'
+import { Badge } from '../ui/Badge'
 import type { Notification } from '../../lib/supabase'
 
 export const TopBar: React.FC = () => {
@@ -45,103 +47,87 @@ export const TopBar: React.FC = () => {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between h-16 px-6">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-xl font-semibold text-gray-900">Sales Dashboard</h1>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          {/* Store Link */}
-          <button
-            onClick={openStore}
-            className="flex items-center space-x-2 px-3 py-2 text-sm text-quickcart-600 hover:text-quickcart-700 hover:bg-quickcart-50 rounded-md transition-colors"
-          >
-            <ExternalLink className="h-4 w-4" />
-            <span>View Store</span>
-          </button>
-          
-          {/* Current Time */}
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <Globe className="h-4 w-4" />
-            <span>
-              {currentTime.toLocaleString('en-US', { 
-                timeZone: 'UTC',
-                dateStyle: 'medium',
-                timeStyle: 'medium'
-              })} UTC
-            </span>
+    <>
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between h-16 px-6">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-xl font-semibold text-gray-900">Sales Dashboard</h1>
           </div>
           
-          {/* Notifications */}
-          <div className="relative">
+          <div className="flex items-center space-x-4">
+            {/* Store Link */}
             <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+              onClick={openStore}
+              className="flex items-center space-x-2 px-3 py-2 text-sm text-quickcart-600 hover:text-quickcart-700 hover:bg-quickcart-50 rounded-md transition-colors"
             >
-              <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
+              <ExternalLink className="h-4 w-4" />
+              <span>View Store</span>
             </button>
             
-            {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                <div className="p-4 border-b border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
-                </div>
-                <div className="max-h-64 overflow-y-auto">
-                  {notifications.length > 0 ? (
-                    notifications.map((notification) => (
-                      <div key={notification.id} className="p-4 border-b border-gray-100 hover:bg-gray-50">
-                        <div className="flex items-start space-x-3">
-                          <div className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${
-                            notification.type === 'error' ? 'bg-red-500' :
-                            notification.type === 'warning' ? 'bg-yellow-500' :
-                            notification.type === 'success' ? 'bg-green-500' :
-                            'bg-blue-500'
-                          }`} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900">{notification.title}</p>
-                            <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                            <p className="text-xs text-gray-400 mt-1">
-                              {new Date(notification.created_at).toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-4 text-center text-gray-500">
-                      No new notifications
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {/* User Menu */}
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <User className="h-5 w-5 text-gray-600" />
-              <div className="text-sm">
-                <div className="font-medium text-gray-900">{admin?.full_name}</div>
-                <div className="text-gray-600">{admin?.location}</div>
-              </div>
+            {/* Current Time */}
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <Globe className="h-4 w-4" />
+              <span>
+                {currentTime.toLocaleString('en-US', { 
+                  timeZone: 'UTC',
+                  dateStyle: 'medium',
+                  timeStyle: 'medium'
+                })} UTC
+              </span>
             </div>
-            <button
-              onClick={logout}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-              title="Logout"
-            >
-              <LogOut className="h-5 w-5" />
+            
+            {/* Notifications */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <Badge 
+                    variant="error" 
+                    size="sm"
+                    className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 flex items-center justify-center text-xs"
+                  >
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </Badge>
+                )}
+              </button>
+            </div>
+            
+            {/* Settings */}
+            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors">
+              <Settings className="h-5 w-5" />
             </button>
+            
+            {/* User Menu */}
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-quickcart-600 text-white rounded-full flex items-center justify-center">
+                  <User className="h-4 w-4" />
+                </div>
+                <div className="text-sm">
+                  <div className="font-medium text-gray-900">{admin?.full_name}</div>
+                  <div className="text-gray-600">{admin?.location}</div>
+                </div>
+              </div>
+              <button
+                onClick={logout}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                title="Logout"
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Notification Center */}
+      <NotificationCenter
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
+    </>
   )
 }

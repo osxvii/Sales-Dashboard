@@ -3,8 +3,12 @@ import { Package, ShoppingCart, Users, AlertTriangle, TrendingUp, DollarSign } f
 import { StatsCard } from '../components/dashboard/StatsCard'
 import { RecentTransactions } from '../components/dashboard/RecentTransactions'
 import { SalesChart } from '../components/dashboard/SalesChart'
+import { QuickActions } from '../components/dashboard/QuickActions'
+import { SystemHealth } from '../components/dashboard/SystemHealth'
 import { dbService } from '../lib/supabase'
 import { formatCurrency } from '../utils/format'
+import { useToast } from '../hooks/useToast'
+import { ToastContainer } from '../components/ui/Toast'
 
 export const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState({
@@ -16,6 +20,7 @@ export const DashboardPage: React.FC = () => {
     todaysSales: 0
   })
   const [loading, setLoading] = useState(true)
+  const { toasts, addToast, removeToast } = useToast()
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -37,15 +42,30 @@ export const DashboardPage: React.FC = () => {
           totalRevenue,
           todaysSales
         })
+
+        // Show welcome toast
+        addToast({
+          type: 'success',
+          title: 'Dashboard Loaded',
+          message: 'Welcome back! Your dashboard data has been updated.',
+          duration: 3000
+        })
+
       } catch (error) {
         console.error('Failed to load dashboard data:', error)
+        addToast({
+          type: 'error',
+          title: 'Loading Error',
+          message: 'Failed to load dashboard data. Please refresh the page.',
+          duration: 5000
+        })
       } finally {
         setLoading(false)
       }
     }
 
     loadDashboardData()
-  }, [])
+  }, [addToast])
 
   if (loading) {
     return (
@@ -63,57 +83,71 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-        <p className="text-gray-600 mt-1">Welcome to your QuickCart sales dashboard</p>
+    <>
+      <div className="p-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+          <p className="text-gray-600 mt-1">Welcome to your QuickCart sales dashboard</p>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+          <StatsCard
+            title="Total Products"
+            value={stats.totalProducts.toLocaleString()}
+            icon={Package}
+            color="blue"
+          />
+          <StatsCard
+            title="Total Transactions"
+            value={stats.totalTransactions.toLocaleString()}
+            icon={ShoppingCart}
+            color="green"
+          />
+          <StatsCard
+            title="Active Admins"
+            value={stats.activeAdmins}
+            icon={Users}
+            color="purple"
+          />
+          <StatsCard
+            title="Unresolved Errors"
+            value={stats.unresolvedErrors}
+            icon={AlertTriangle}
+            color="red"
+          />
+          <StatsCard
+            title="Total Revenue"
+            value={formatCurrency(stats.totalRevenue)}
+            icon={DollarSign}
+            color="green"
+          />
+          <StatsCard
+            title="Today's Sales"
+            value={formatCurrency(stats.todaysSales)}
+            icon={TrendingUp}
+            color="blue"
+          />
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Charts */}
+          <div className="lg:col-span-2 space-y-6">
+            <SalesChart />
+            <RecentTransactions />
+          </div>
+          
+          {/* Right Column - Actions & Health */}
+          <div className="space-y-6">
+            <QuickActions />
+            <SystemHealth />
+          </div>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-        <StatsCard
-          title="Total Products"
-          value={stats.totalProducts.toLocaleString()}
-          icon={Package}
-          color="blue"
-        />
-        <StatsCard
-          title="Total Transactions"
-          value={stats.totalTransactions.toLocaleString()}
-          icon={ShoppingCart}
-          color="green"
-        />
-        <StatsCard
-          title="Active Admins"
-          value={stats.activeAdmins}
-          icon={Users}
-          color="purple"
-        />
-        <StatsCard
-          title="Unresolved Errors"
-          value={stats.unresolvedErrors}
-          icon={AlertTriangle}
-          color="red"
-        />
-        <StatsCard
-          title="Total Revenue"
-          value={formatCurrency(stats.totalRevenue)}
-          icon={DollarSign}
-          color="green"
-        />
-        <StatsCard
-          title="Today's Sales"
-          value={formatCurrency(stats.todaysSales)}
-          icon={TrendingUp}
-          color="blue"
-        />
-      </div>
-
-      {/* Charts and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SalesChart />
-        <RecentTransactions />
-      </div>
-    </div>
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onClose={removeToast} />
+    </>
   )
 }
