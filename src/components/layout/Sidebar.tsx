@@ -11,7 +11,8 @@ import {
   Building2,
   Tags,
   Activity,
-  Shield
+  Shield,
+  Settings
 } from 'lucide-react'
 import { cn } from '../../utils/cn'
 
@@ -27,6 +28,7 @@ const navigation = [
   { name: 'Access Logs', href: '/access-logs', icon: Shield },
   { name: 'AI Monitor', href: '/monitor', icon: Activity },
   { name: 'Chat (Stella)', href: '/chat', icon: MessageSquare },
+  { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
 export const Sidebar: React.FC = () => {
@@ -64,7 +66,7 @@ export const Sidebar: React.FC = () => {
       
       <div className="p-4 border-t border-gray-200">
         <div className="text-xs text-gray-500 text-center">
-          QuickCart Dashboard v1.0
+          QuickCart Dashboard v2.0
         </div>
       </div>
     </div>

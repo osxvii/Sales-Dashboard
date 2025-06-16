@@ -14,11 +14,15 @@ import { AdminsPage } from './pages/AdminsPage'
 import { AccessLogsPage } from './pages/AccessLogsPage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { ChatPage } from './pages/ChatPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { useAuth } from './hooks/useAuth'
+import { useToast } from './hooks/useToast'
+import { ToastContainer } from './components/ui/Toast'
 import './index.css'
 
 function App() {
   const { admin, loading } = useAuth()
+  const { toasts, removeToast } = useToast()
 
   if (loading) {
     return (
@@ -32,31 +36,37 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/store" element={<EcommercePage />} />
-          <Route path="/login" element={!admin ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
-          
-          {/* Protected Admin Routes */}
-          <Route path="/" element={admin ? <DashboardLayout /> : <Navigate to="/login" replace />}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="products" element={<ProductsPage />} />
-            <Route path="transactions" element={<TransactionsPage />} />
-            <Route path="companies" element={<CompaniesPage />} />
-            <Route path="categories" element={<CategoriesPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="monitor" element={<MonitorPage />} />
-            <Route path="errors" element={<ErrorLogsPage />} />
-            <Route path="admins" element={<AdminsPage />} />
-            <Route path="access-logs" element={<AccessLogsPage />} />
-            <Route path="chat" element={<ChatPage />} />
-          </Route>
-        </Routes>
-      </div>
-    </Router>
+    <>
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/store" element={<EcommercePage />} />
+            <Route path="/login" element={!admin ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
+            
+            {/* Protected Admin Routes */}
+            <Route path="/" element={admin ? <DashboardLayout /> : <Navigate to="/login" replace />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="products" element={<ProductsPage />} />
+              <Route path="transactions" element={<TransactionsPage />} />
+              <Route path="companies" element={<CompaniesPage />} />
+              <Route path="categories" element={<CategoriesPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="monitor" element={<MonitorPage />} />
+              <Route path="errors" element={<ErrorLogsPage />} />
+              <Route path="admins" element={<AdminsPage />} />
+              <Route path="access-logs" element={<AccessLogsPage />} />
+              <Route path="chat" element={<ChatPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+          </Routes>
+        </div>
+      </Router>
+
+      {/* Global Toast Notifications */}
+      <ToastContainer toasts={toasts} onClose={removeToast} />
+    </>
   )
 }
 
