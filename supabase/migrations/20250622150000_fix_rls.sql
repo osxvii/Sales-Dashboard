@@ -1,10 +1,8 @@
--- Allow admin record creation
-DROP POLICY IF EXISTS "Authenticated users can manage admins" ON admins;
-CREATE POLICY "Allow admin creation" ON admins 
-FOR INSERT TO anon 
-WITH CHECK (email = 'admin@quickcart.com');
+-- Remove all existing policies
+DROP POLICY IF EXISTS "Authenticated users can manage access_logs" ON access_logs;
+DROP POLICY IF EXISTS "Allow all access log inserts" ON access_logs;
+DROP POLICY IF EXISTS "Allow admin access to logs" ON access_logs;
 
--- Allow access logs to reference the admin
-ALTER TABLE access_logs DROP CONSTRAINT IF EXISTS access_logs_admin_id_fkey;
-ALTER TABLE access_logs ADD CONSTRAINT access_logs_admin_id_fkey 
-FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL;
+-- Create simple, permissive policies
+CREATE POLICY "Allow all access log operations" ON access_logs 
+FOR ALL USING (true) WITH CHECK (true);
