@@ -36,14 +36,20 @@ export const useAuth = () => {
 
     try {
       // Get admin by email (simplified auth for demo)
-      const { data: admin, error } = await supabase
+      const { data, error } = await supabase
         .from('admins')
         .select('*')
         .eq('email', email)
         .eq('is_active', true)
-        .single()
+        .limit(1)
 
-      if (error || !admin) {
+      if (error) {
+        throw new Error('Database query failed')
+      }
+
+      const admin = data && data.length > 0 ? data[0] : null
+
+      if (!admin) {
         throw new Error('Invalid credentials')
       }
 
