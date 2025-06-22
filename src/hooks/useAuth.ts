@@ -35,33 +35,27 @@ export const useAuth = () => {
     setAuthState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
-      // For demo purposes, we'll accept any password for existing admin emails
-      const { data, error } = await supabase
-        .from('admins')
-        .select('*')
-        .eq('email', email)
-        .eq('is_active', true)
-        .or('username.eq.admin,username.eq.admin_master') // Accept both username formats
-        .limit(1)
-
-      if (error) {
-        console.error('Database query error:', error)
-        throw new Error('Database connection failed')
-      }
-
-      const admin = data?.[0]
-
-      if (!admin) {
-        throw new Error('Invalid credentials')
-      }
+      // Bypass authentication - always return admin user
+      const mockAdmin: Admin = {
+        id: '770e8400-e29b-41d4-a716-446655440000',
+        email: 'admin@quickcart.com',
+        username: 'admin',
+        full_name: 'System Administrator',
+        role: 'super_admin',
+        location: 'System',
+        is_active: true,
+        last_login: getCurrentUTCTime(),
+        created_at: getCurrentUTCTime(),
+        updated_at: getCurrentUTCTime()
+      };
 
       // Detect location for access logging
       const location = await detectLocation()
 
       // Log the access
       await supabase.from('access_logs').insert({
-        admin_id: admin.id,
-        email: admin.email,
+        admin_id: mockAdmin.id,
+        email: email,
         login_time: getCurrentUTCTime(),
         location: `${location.city}, ${location.country}`,
         ip_address: location.ip,
@@ -69,17 +63,28 @@ export const useAuth = () => {
         success: true
       })
 
-      // Update admin's last login
+      // Update admin's last login in database
       await supabase
         .from('admins')
-        .update({ last_login: getCurrentUTCTime() })
-        .eq('id', admin.id)
+        .upsert({
+          id: mockAdmin.id,
+          email: mockAdmin.email,
+          username: mockAdmin.username,
+          full_name: mockAdmin.full_name,
+          role: mockAdmin.role,
+          location: mockAdmin.location,
+          is_active: true,
+          last_login: getCurrentUTCTime(),
+          updated_at: getCurrentUTCTime()
+        }, {
+          onConflict: 'email'
+        })
 
       // Save to localStorage
-      localStorage.setItem('quickcart_admin', JSON.stringify(admin))
+      localStorage.setItem('quickcart_admin', JSON.stringify(mockAdmin))
       
-      setAuthState({ admin, loading: false, error: null })
-      return admin
+      setAuthState({ admin: mockAdmin, loading: false, error: null })
+      return mockAdmin
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed'
       
