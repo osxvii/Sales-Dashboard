@@ -41,14 +41,14 @@ export const useAuth = () => {
         .select('*')
         .eq('email', email)
         .eq('is_active', true)
-        .single()
+        .limit(1)
 
       if (error) {
         console.error('Database query error:', error)
         throw new Error('Invalid credentials')
       }
 
-      const admin = data
+      const admin = data?.[0]
 
       if (!admin) {
         throw new Error('Invalid credentials')
