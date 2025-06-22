@@ -227,14 +227,14 @@ export const dbService = {
     return data as AccessLog[]
   },
 
-  // Error Logs
+   // Error Logs
   async getErrorLogs(resolved?: boolean) {
     let query = supabase
       .from('error_logs')
       .select(`
         *,
         product:products(*),
-        admin:admins(*),
+        admin:admins!error_logs_admin_id_fkey(*),
         resolved_by_admin:admins!error_logs_resolved_by_fkey(*)
       `)
       .order('created_at', { ascending: false })
