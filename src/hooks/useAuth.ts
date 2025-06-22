@@ -36,12 +36,12 @@ export const useAuth = () => {
 
     try {
       // For demo purposes, we'll accept any password for existing admin emails
-      // In production, this would use proper password authentication
       const { data, error } = await supabase
         .from('admins')
         .select('*')
         .eq('email', email)
         .eq('is_active', true)
+        .or('username.eq.admin,username.eq.admin_master') // Accept both username formats
         .limit(1)
 
       if (error) {
