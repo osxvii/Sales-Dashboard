@@ -35,7 +35,8 @@ export const useAuth = () => {
     setAuthState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
-      // Get admin by email (simplified auth for demo)
+      // For demo purposes, we'll accept any password for existing admin emails
+      // In production, this would use proper password authentication
       const { data, error } = await supabase
         .from('admins')
         .select('*')
@@ -45,7 +46,7 @@ export const useAuth = () => {
 
       if (error) {
         console.error('Database query error:', error)
-        throw new Error('Invalid credentials')
+        throw new Error('Database connection failed')
       }
 
       const admin = data?.[0]
