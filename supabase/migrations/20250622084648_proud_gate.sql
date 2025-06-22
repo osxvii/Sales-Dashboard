@@ -1,4 +1,4 @@
--- Ensure the admin user exists with correct data
+-- Ensure the admin user exists with correct data using a single UPSERT
 INSERT INTO admins (
   id,
   email,
@@ -20,37 +20,12 @@ INSERT INTO admins (
   now(),
   now()
 ) ON CONFLICT (email) DO UPDATE SET
-  is_active = true,
-  role = 'super_admin',
-  full_name = 'System Administrator',
-  username = 'admin',
-  updated_at = now();
-
--- Also ensure the original admin user from the seed data exists
-INSERT INTO admins (
-  id,
-  email,
-  username,
-  full_name,
-  role,
-  location,
-  is_active,
-  created_at,
-  updated_at
-) VALUES (
-  '770e8400-e29b-41d4-a716-446655440001',
-  'admin@quickcart.com',
-  'admin_master',
-  'John Anderson',
-  'super_admin',
-  'New York, USA',
-  true,
-  now(),
-  now()
-) ON CONFLICT (email) DO UPDATE SET
-  is_active = true,
-  role = 'super_admin',
-  updated_at = now();
+  username = EXCLUDED.username,
+  full_name = EXCLUDED.full_name,
+  role = EXCLUDED.role,
+  location = EXCLUDED.location,
+  is_active = EXCLUDED.is_active,
+  updated_at = EXCLUDED.updated_at;
 
 -- Verify the user exists
 SELECT id, email, username, full_name, role, is_active 
