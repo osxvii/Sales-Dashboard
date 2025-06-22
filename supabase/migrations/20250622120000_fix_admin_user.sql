@@ -1,12 +1,4 @@
--- Fix admin user conflicts
 BEGIN;
-
--- Remove conflicting migrations
-DELETE FROM supabase_migrations WHERE name IN (
-  '20250622084445_humble_snow',
-  '20250622084648_proud_gate',
-  '20250622093101_misty_spark'
-);
 
 -- Single consistent admin user setup
 INSERT INTO admins (
@@ -38,8 +30,6 @@ INSERT INTO admins (
   updated_at = EXCLUDED.updated_at;
 
 -- Fix RLS policies for access logs
-ALTER TABLE access_logs ENABLE ROW LEVEL SECURITY;
-
 DROP POLICY IF EXISTS "Authenticated users can manage access_logs" ON access_logs;
 
 CREATE POLICY "Allow all access log inserts" ON access_logs 
